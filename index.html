@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap4.min.css'>
+    <link rel='stylesheet' href='https://cdn.form.io/formiojs/formio.full.min.css'>
+    <script src='https://cdn.form.io/formiojs/formio.full.min.js'></script>
+    <script src='https://code.jquery.com/jquery-3.5.1.js'></script>
+    <script src='https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js'></script>
+    <script src='https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js'></script>
+    
+    <script type='text/javascript'>
+
+        let configs = [ //add demo forms
+            {
+                components: [
+                    {
+                        "title": "Form 1",
+                        "label": "Form 1",
+                        "type": "panel",
+                        "key": "page1",
+                        "components": [
+                            {
+                                "label": "Name",
+                                "placeholder": "Enter Name",
+                                "tableView": true,
+                                "validate": {
+                                    "customMessage": "Enter Name",
+                                    "minLength": 3,
+                                    "maxLength": 50
+                                },
+                                "errorLabel": "Required",
+                                "key": "name",
+                                "type": "textfield",
+                                "input": true
+                            },
+                            {
+                                "label": "Submit",
+                                "showValidations": false,
+                                "tableView": false,
+                                "key": "submit",
+                                "type": "button",
+                                "input": true
+                            }
+                        ],
+                        "input": false,
+                        "tableView": false
+                    }
+                ]
+            }, {
+                components: [
+                    {
+                        "title": "Form 2",
+                        "label": "Form 2",
+                        "type": "panel",
+                        "key": "page1",
+                        "components": [
+                            {
+                                "label": "First Name",
+                                "placeholder": "First Name",
+                                "tableView": true,
+                                "validate": {
+                                    "customMessage": "Enter First Name",
+                                    "minLength": 3,
+                                    "maxLength": 50
+                                },
+                                "errorLabel": "Required",
+                                "key": "name",
+                                "type": "textfield",
+                                "input": true
+                            },
+                            {
+                                "label": "Last Name",
+                                "placeholder": "Last Name",
+                                "tableView": true,
+                                "validate": {
+                                    "customMessage": "Enter Last Name",
+                                    "minLength": 3,
+                                    "maxLength": 50
+                                },
+                                "errorLabel": "Required",
+                                "key": "name",
+                                "type": "textfield",
+                                "input": true
+                            },
+                            {
+                                "label": "Submit",
+                                "showValidations": false,
+                                "tableView": false,
+                                "key": "submit",
+                                "type": "button",
+                                "input": true
+                            }
+                        ],
+                        "input": false,
+                        "tableView": false
+                    }
+                ]
+            }
+        ];
+
+        let config = {
+            components: [
+                {
+                    "title": "Form 3",
+                    "label": "Form 3",
+                    "type": "panel",
+                    "key": "page1",
+                    "input": false,
+                    "tableView": false
+                }
+            ]
+        };
+
+        let render;
+        function initRender() {
+            Formio.createForm(document.getElementById('formio-render'), config).then(render => {
+                render = render;
+                render.on("submit", (e, submission) => {
+
+                    let sub = JSON.stringify(render.submission, null, 4);
+                    $("#data").val(sub);
+
+                }).on("formSubmit", (e, submission) => {
+                    console.log(e);
+                });
+            });
+        }
+
+        let builder;
+        function initBuilder(code) {
+            if (code) {
+                config = JSON.parse(code);
+            }
+
+            Formio.builder(document.getElementById('formio-builder'), config, {
+                builder: {
+                    resource: false,
+                    advanced: false,
+                    premium: false
+                }
+            }).then((builder) => {
+                builder = builder;
+                builder.on("change", () => {
+                    config = builder.schema;
+                    initRender(); //update renderer
+                    initConfig(); //update code
+                    console.log(JSON.stringify(builder.schema, null, 4));
+                });
+            });
+        }
+
+        function initConfig() {
+            document.getElementById("config").value = JSON.stringify(config, null, 4);
+        }
+
+        $(document).ready(function (e) {
+
+            initRender(); //init renderer
+            initBuilder(); //init builder
+            initConfig(); //init config
+
+            $('#example').DataTable();
+
+            $(".edit").click(function (e) {
+                let index = parseInt($(this).attr("data-index"));
+                config = configs[index]; //set config
+                initBuilder(); //init builder
+                initRender(); //init renderer
+            });
+
+            $(".save").click(function (e) {
+                console.log(e);
+            });
+
+            $(".new").click(function (e) {
+                config = {
+                    components: [
+                        {
+                            "title": "Form 3",
+                            "label": "Form 3",
+                            "type": "panel",
+                            "key": "page1",
+                            "input": false,
+                            "tableView": false
+                        }
+                    ]
+                }; //reset config
+                initBuilder(); //init builder
+                initRender(); //init renderer
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Edit</h2>
+        <table id="example" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Form Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Form 1</td>
+                    <td><button data-index="0" class="btn btn-primary edit">Edit</button></td>
+                </tr>
+                <tr>
+                    <td>Form 2</td>
+                    <td><button data-index="1" class="btn btn-primary edit">Edit</button></td>
+                </tr>
+        </table>
+        <button class="btn btn-primary new">New</button>
+        <button class="btn btn-success save">Save</button>
+
+        <h2>Build</h2>
+        <div id='formio-builder'></div>
+        <h2>Test</h2>
+        <div id='formio-render'></div>
+        <h2>Data</h2>
+        <textarea id="data" readonly rows="5" class="form-control"></textarea>
+        <h2>Code</h2>
+        <textarea id="config" onchange="initBuilder(this.value)" rows="10" class="form-control"></textarea>
+        <button class="btn btn-primary mt-2 mb-2">Update Code</button>
+    </div>
+</body>
+</html>
